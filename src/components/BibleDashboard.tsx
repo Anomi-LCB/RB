@@ -286,7 +286,7 @@ export default function BibleDashboard({
 
                 <section className="space-y-3 pb-4">
                     <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest px-1">YouTube Guide</h3>
-                    <div className="space-y-2.5">
+                    <div className="space-y-2.5 p-4 rounded-[2rem] bg-slate-50 border border-slate-100/50">
                         <a
                             href={new365Link}
                             target="_blank"
@@ -294,7 +294,7 @@ export default function BibleDashboard({
                         >
                             <div className="flex items-center gap-3.5">
                                 <Youtube size={22} strokeWidth={2} />
-                                <span className="font-bold text-[13.5px] tracking-tight">NEW 365 성경 읽기 영상</span>
+                                <span className="font-bold text-[13px] tracking-tight">NEW 365 성경 읽기 영상(재생목록)</span>
                             </div>
                             <ExternalLink size={16} className="opacity-40 group-hover:translate-x-1 transition-transform" />
                         </a>
@@ -303,22 +303,22 @@ export default function BibleDashboard({
                             <a
                                 href={otLink}
                                 target="_blank"
-                                className="flex-1 bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-3 hover:border-indigo-100 hover:shadow-md transition-all group"
+                                className="flex-1 bg-white p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3 hover:border-indigo-100 hover:shadow-md transition-all group"
                             >
                                 <div className="bg-red-50 p-2 rounded-xl text-red-500 group-hover:scale-105 transition-transform">
                                     <Youtube size={16} strokeWidth={2} />
                                 </div>
-                                <span className="text-[11px] font-bold text-slate-600">구약 가이드</span>
+                                <span className="text-[10px] font-bold text-slate-600 leading-tight">구약 개관<br />(공동체 성경 읽기)</span>
                             </a>
                             <a
                                 href={ntLink}
                                 target="_blank"
-                                className="flex-1 bg-white p-4 rounded-2xl border border-slate-100 flex items-center gap-3 hover:border-indigo-100 hover:shadow-md transition-all group"
+                                className="flex-1 bg-white p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3 hover:border-indigo-100 hover:shadow-md transition-all group"
                             >
                                 <div className="bg-red-50 p-2 rounded-xl text-red-500 group-hover:scale-105 transition-transform">
                                     <Youtube size={16} strokeWidth={2} />
                                 </div>
-                                <span className="text-[11px] font-bold text-slate-600">신약 가이드</span>
+                                <span className="text-[10px] font-bold text-slate-600 leading-tight">신약 개관<br />(공동체 성경 읽기)</span>
                             </a>
                         </div>
                     </div>

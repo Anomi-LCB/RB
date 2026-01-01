@@ -43,7 +43,7 @@ export default function BibleCard({ plan, isCompleted, onToggle }: BibleCardProp
 
                 <div className="space-y-3">
                     <h2 className={cn(
-                        "text-2xl font-bold tracking-tight leading-snug transition-all duration-500",
+                        "text-[1.65rem] font-bold tracking-tight leading-snug transition-all duration-500",
                         isCompleted ? "text-slate-300 line-through decoration-slate-200 decoration-1" : "text-slate-800"
                     )}>
                         {plan.title}
