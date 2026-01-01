@@ -212,9 +212,9 @@ export default function LoginPage() {
                         Start your 365 days today
                     </p>
                 </div>
-            </div>
 
-            <ChurchLogo />
+                <ChurchLogo />
+            </div>
         </main>
     );
 }

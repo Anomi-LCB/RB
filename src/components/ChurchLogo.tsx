@@ -6,7 +6,7 @@ export default function ChurchLogo() {
     const [isError, setIsError] = useState(false);
 
     return (
-        <div className="flex justify-center items-center py-16 mt-auto">
+        <div className="flex justify-center items-center py-4">
             <div className="flex items-center justify-center transition-all duration-500 hover:scale-105">
                 {!isError ? (
                     <a
