@@ -17,6 +17,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ChurchLogo from "./ChurchLogo";
 import { getOfficialCategory, generateKeywords, calculateReadingTime } from "@/lib/bible-utils";
 import YoutubePlayer from "./YoutubePlayer";
+import { fetchYoutubePlaylist, getDayOfYear, getVideoForDay, parseDurationToMinutes, YoutubeVideo } from "@/lib/youtube";
+import { Play, Loader2, Youtube as YoutubeIcon, Info } from 'lucide-react';
 
 interface BibleDashboardProps {
     user: any;
@@ -45,6 +47,24 @@ export default function BibleDashboard({
 
     // 진행 상황 상태 관리 (Optimistic)
     const [userProgress, setUserProgress] = useState(initialProgress);
+    const [youtubeVideos, setYoutubeVideos] = useState<YoutubeVideo[]>([]);
+    const [isYoutubeLoading, setIsYoutubeLoading] = useState(false);
+
+    // 유튜브 데이터 로드
+    useEffect(() => {
+        const loadYoutube = async () => {
+            setIsYoutubeLoading(true);
+            try {
+                const videos = await fetchYoutubePlaylist();
+                setYoutubeVideos(videos);
+            } catch (e) {
+                console.error("YouTube load failed", e);
+            } finally {
+                setIsYoutubeLoading(false);
+            }
+        };
+        loadYoutube();
+    }, []);
 
     // URL과 동기화 및 게스트 데이터 로드
     useEffect(() => {
@@ -127,13 +147,17 @@ export default function BibleDashboard({
             }
         }
 
+        const dayOfYear = getDayOfYear(new Date(selectedDate));
+        const video = getVideoForDay(youtubeVideos, dayOfYear);
+        const youtubeTime = video?.duration ? `오늘의 읽기, 약 ${parseDurationToMinutes(video.duration)}분 소요` : null;
+
         return {
             ...processedPlan,
             category: processedPlan.category || getOfficialCategory(processedPlan.verses),
             summary: processedPlan.summary || generateKeywords(processedPlan.verses),
-            reading_time: processedPlan.reading_time || calculateReadingTime(processedPlan.verses)
+            reading_time: youtubeTime || processedPlan.reading_time || calculateReadingTime(processedPlan.verses)
         };
-    }, [rawTargetPlan]);
+    }, [rawTargetPlan, youtubeVideos, selectedDate]);
 
     const isCompleted = targetPlan ? completedIds.includes(targetPlan.id) : false;
 
@@ -219,11 +243,11 @@ export default function BibleDashboard({
                 </div>
             </header>
 
-            <div className="max-w-md mx-auto px-5 py-6 pb-0 space-y-6 flex-grow w-full">
-                <section className="space-y-4">
+            <div className="max-w-md mx-auto px-5 py-6 pb-0 space-y-7 flex-grow w-full">
+                <section className="space-y-5">
                     <DateNavigator
                         currentDate={selectedDate}
-                        onDateChange={handleDateChange} // 이 함수를 통해 0.01초 전환 구현
+                        onDateChange={handleDateChange}
                     />
                     {weather && (
                         <div className="flex justify-center items-center gap-4 text-[10px] font-medium tracking-wider text-[#94A3B8] uppercase">
@@ -260,9 +284,12 @@ export default function BibleDashboard({
                     </div>
                 </section>
 
-                <section className="space-y-3">
+                <section className="space-y-4">
                     <div className="flex items-center justify-between px-1">
-                        <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest">Plan</h3>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-4 bg-[#4E56D1] rounded-full"></div>
+                            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Today's Plan</h3>
+                        </div>
                         <div className="flex items-center gap-2 bg-indigo-50/50 px-2.5 py-1 rounded-full border border-indigo-100/30">
                             <span className="text-[9px] text-[#4E56D1] font-bold">D-{daysLeft} Left</span>
                         </div>
@@ -284,8 +311,11 @@ export default function BibleDashboard({
                     <YoutubePlayer selectedDate={selectedDate} />
                 </section>
 
-                <section className="space-y-3 pb-4">
-                    <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest px-1">YouTube Guide</h3>
+                <section className="space-y-4 pb-4">
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="w-1.5 h-4 bg-[#3DAA9C] rounded-full"></div>
+                        <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">YouTube Guide</h3>
+                    </div>
                     <div className="space-y-2.5 p-4 rounded-[2rem] bg-slate-50 border border-slate-100/50">
                         <a
                             href={new365Link}
@@ -293,8 +323,8 @@ export default function BibleDashboard({
                             className="group flex items-center justify-between bg-[#3DAA9C] px-5 py-4 rounded-2xl text-white shadow-xl shadow-teal-900/10 active:scale-[0.98] transition-all"
                         >
                             <div className="flex items-center gap-3.5">
-                                <Youtube size={22} strokeWidth={2} />
-                                <span className="font-bold text-[13px] tracking-tight">NEW 365 성경 읽기 영상(재생목록)</span>
+                                <YoutubeIcon size={22} strokeWidth={2} />
+                                <span className="font-bold text-[14px] tracking-tight">NEW 365 성경 읽기 영상(재생목록)</span>
                             </div>
                             <ExternalLink size={16} className="opacity-40 group-hover:translate-x-1 transition-transform" />
                         </a>
@@ -303,29 +333,38 @@ export default function BibleDashboard({
                             <a
                                 href={otLink}
                                 target="_blank"
-                                className="flex-1 bg-white p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3 hover:border-indigo-100 hover:shadow-md transition-all group"
+                                className="flex-1 bg-white p-3.5 rounded-2xl border border-slate-100 flex items-center gap-2 hover:border-indigo-100 hover:shadow-md transition-all group"
                             >
                                 <div className="bg-red-50 p-2 rounded-xl text-red-500 group-hover:scale-105 transition-transform">
-                                    <Youtube size={16} strokeWidth={2} />
+                                    <YoutubeIcon size={16} strokeWidth={2} />
                                 </div>
-                                <span className="text-[10px] font-bold text-slate-600 leading-tight">구약 개관<br />(공동체 성경 읽기)</span>
+                                <div className="flex flex-col">
+                                    <span className="text-[12px] font-bold text-slate-700 leading-none mb-1">구약 개관</span>
+                                    <span className="text-[8.5px] font-bold text-slate-400 leading-none whitespace-nowrap">(공동체성경읽기)</span>
+                                </div>
                             </a>
                             <a
                                 href={ntLink}
                                 target="_blank"
-                                className="flex-1 bg-white p-3.5 rounded-2xl border border-slate-100 flex items-center gap-3 hover:border-indigo-100 hover:shadow-md transition-all group"
+                                className="flex-1 bg-white p-3.5 rounded-2xl border border-slate-100 flex items-center gap-2 hover:border-indigo-100 hover:shadow-md transition-all group"
                             >
                                 <div className="bg-red-50 p-2 rounded-xl text-red-500 group-hover:scale-105 transition-transform">
-                                    <Youtube size={16} strokeWidth={2} />
+                                    <YoutubeIcon size={16} strokeWidth={2} />
                                 </div>
-                                <span className="text-[10px] font-bold text-slate-600 leading-tight">신약 개관<br />(공동체 성경 읽기)</span>
+                                <div className="flex flex-col">
+                                    <span className="text-[12px] font-bold text-slate-700 leading-none mb-1">신약 개관</span>
+                                    <span className="text-[8.5px] font-bold text-slate-400 leading-none whitespace-nowrap">(공동체성경읽기)</span>
+                                </div>
                             </a>
                         </div>
                     </div>
                 </section>
 
-                <section className="space-y-3 pb-8">
-                    <h3 className="text-[11px] font-semibold text-slate-400 uppercase tracking-widest px-1">Progress Map</h3>
+                <section className="space-y-4 pb-12">
+                    <div className="flex items-center gap-2 px-1">
+                        <div className="w-1.5 h-4 bg-orange-400 rounded-full"></div>
+                        <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Progress Map</h3>
+                    </div>
                     <BibleProgressMap completedVerses={completedVerses} />
                 </section>
             </div>
