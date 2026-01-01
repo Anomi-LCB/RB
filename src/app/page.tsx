@@ -15,13 +15,6 @@ export default async function Home({ searchParams }: HomeProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const cookieStore = await cookies();
-  const isGuest = cookieStore.get('guest_mode')?.value === 'true';
-
-  if (!user && !isGuest) {
-    redirect("/login");
-  }
-
   const resolvedSearchParams = await searchParams;
   const todayStrKST = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
   const selectedDate = resolvedSearchParams.date || todayStrKST;

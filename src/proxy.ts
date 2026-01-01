@@ -35,20 +35,7 @@ export async function proxy(request: NextRequest) {
         }
     )
 
-    const { data: { user } } = await supabase.auth.getUser()
-    const isGuest = request.cookies.get('guest_mode')?.value === 'true'
-    const { pathname } = request.nextUrl
-
-    // 1. 이미 로그인된 사용자가 /login 에 접근하면 / 로 리다이렉트
-    if ((user || isGuest) && pathname === '/login') {
-        return NextResponse.redirect(new URL('/', request.url))
-    }
-
-    // 2. 로그인되지 않은 사용자가 / (메인) 에 접근하면 /login 으로 리다이렉트
-    if (!user && !isGuest && pathname === '/') {
-        return NextResponse.redirect(new URL('/login', request.url))
-    }
-
+    // 리다이렉션 로직 제거 (로그인 페이지 사용 안 함)
     return response
 }
 
