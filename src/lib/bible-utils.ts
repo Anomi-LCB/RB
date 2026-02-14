@@ -23,16 +23,21 @@ export function getOfficialCategory(verses: string[]): string {
 /**
  * 성경 구절로부터 요약 키워드(해시태그)를 장별(Chapter) 핵심 내용 기반으로 생성합니다.
  */
-export function generateKeywords(verses: string[]): string {
-    if (!verses || verses.length === 0) return "#말씀 #묵상";
+/**
+ * 성경 구절로부터 요약 키워드(해시태그)를 장별(Chapter) 핵심 내용 기반으로 생성합니다.
+ * UI 렌더링을 위해 구조화된 데이터를 반환합니다.
+ */
+export function generateStructuredKeywords(verses: string[]): { text: string; isPsalm: boolean }[] {
+    if (!verses || verses.length === 0) return [{ text: "#말씀", isPsalm: false }, { text: "#묵상", isPsalm: false }];
 
-    const keywords = new Set<string>();
+    const keywords = new Map<string, boolean>(); // Key: keyword, Value: isPsalm
 
     verses.forEach(v => {
         const parts = v.split(' ');
         if (parts.length < 2) return;
 
         const bookName = parts[0];
+        const isPsalm = bookName === '시편';
         const chapterPart = parts[1].replace('장', '');
 
         // 장 번호 추출 (범위일 경우 첫 장 기준)
@@ -41,18 +46,27 @@ export function generateKeywords(verses: string[]): string {
         // 1. 장별 정밀 키워드 확인
         const chapterData = CHAPTER_KEYWORDS[bookName]?.[chapterNum];
         if (chapterData) {
-            chapterData.forEach(k => keywords.add(k));
+            chapterData.forEach(k => keywords.set(k, isPsalm));
         } else {
             // 2. 장별 데이터 없을 시 책 단위 키워드 폴백
             const book = BIBLE_BOOKS.find(b => b.name === bookName);
             if (book) {
-                book.keywords.forEach(k => keywords.add(k));
+                book.keywords.forEach(k => keywords.set(k, isPsalm));
             }
         }
     });
 
-    // 최종 해시태그 생성
-    return Array.from(keywords).slice(0, 6).map(k => `#${k}`).join(' ');
+    // 최종 해시태그 생성 (최대 6개)
+    return Array.from(keywords.entries())
+        .slice(0, 6)
+        .map(([k, isPsalm]) => ({ text: `#${k}`, isPsalm }));
+}
+
+/**
+ * 하위 호환성을 위한 문자열 반환 함수
+ */
+export function generateKeywords(verses: string[]): string {
+    return generateStructuredKeywords(verses).map(k => k.text).join(' ');
 }
 
 /**

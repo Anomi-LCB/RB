@@ -10,9 +10,10 @@ export type BibleReadingPlan = {
 };
 
 export type UserProgress = {
-  id: string;
-  user_id: string;
+  id?: string;
+  user_id?: string;
   plan_id: number;
-  is_completed: boolean;
-  completed_at: string;
+  is_completed?: boolean;
+  completed_at?: string;
+  reading_plan?: BibleReadingPlan;
 };

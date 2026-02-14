@@ -21,15 +21,15 @@ export default function BibleCardWrapper({
     const supabase = createClient();
     const router = useRouter();
 
-    // 플랜이 바뀌어도 로컬 상태가 유지되는 문제를 방지하기 위해 
-    // initialIsCompleted가 바뀌면 상태를 동기화합니다.
+    // ?뚮옖??諛붾뚯뼱??濡쒖뺄 ?곹깭媛 ?좎??섎뒗 臾몄젣瑜?諛⑹??섍린 ?꾪빐 
+    // initialIsCompleted媛 諛붾뚮㈃ ?곹깭瑜??숆린?뷀빀?덈떎.
     useEffect(() => {
         setIsCompleted(initialIsCompleted);
     }, [initialIsCompleted]);
 
     const handleToggle = async (planId: number) => {
         if (isCompleted) {
-            // 완료 취소
+            // ?꾨즺 痍⑥냼
             const { error } = await supabase
                 .from("user_progress")
                 .delete()
@@ -38,10 +38,10 @@ export default function BibleCardWrapper({
 
             if (!error) {
                 setIsCompleted(false);
-                router.refresh(); // 부모 페이지의 통계 동기화를 위해 새로고침
+                router.refresh(); // 遺紐??섏씠吏???듦퀎 ?숆린?붾? ?꾪빐 ?덈줈怨좎묠
             }
         } else {
-            // 완료 체크
+            // ?꾨즺 泥댄겕
             const { error } = await supabase
                 .from("user_progress")
                 .insert({
